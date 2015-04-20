@@ -21,7 +21,7 @@ unsigned char* charToBinary(unsigned char input);
 int main(int argc, char** argv){	
 
 	if(argc < 3){
-		printf("\nError: Not enough arguments.\n\nUsage: modulation [input file] [output file].wav\n\n");
+		printf("\nError: Not enough arguments.\n\nUsage: modulate [input file] [output file].wav\n\n");
 		exit(1);
 	}
 
