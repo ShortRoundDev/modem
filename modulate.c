@@ -11,7 +11,7 @@ takes argv[1] for input and argv[2] for output*/
 #include <math.h>
 
 #define SAMPLESIZE 	74
-#define PI			3.141592
+#define PI		3.141592
 
 	/*returns -1 if <0, 1 if >= 0*/
 signed short returnParity(double input);
@@ -32,7 +32,7 @@ int main(int argc, char** argv){
 			* get byte #, return as size of file in bytes*/
 		fileInput = fopen(argv[1], "rb");
 		if(fileInput == NULL){
-			printf("\nError \""); printf("%s",argv[1]); printf("\": No such file found!\n\n");
+			printf("\nError \"%s\": No such file found!\n\n",argv[1]);
 			exit(1);
 		}	
 					fseek(fileInput, 0, SEEK_END);	
@@ -49,7 +49,7 @@ int main(int argc, char** argv){
 	SNDFILE* transmissionFile = sf_open(argv[2], SFM_WRITE, &transInformation);
 
 	if(transmissionFile == NULL){
-		printf("\nError \""); printf("%s",argv[2]); printf("\": could not create file!\n\n");
+		printf("\nError \"%s\": could not create file!\n\n",argv[2]);
 		exit(1);
 	}
 
@@ -116,7 +116,6 @@ int main(int argc, char** argv){
 }
 
 unsigned char* charToBinary(unsigned char input){
-		/*size 9 so that the 8th element is null terminated (\0)*/
 	unsigned char *binaryString = malloc(8);
 
 		/*initialize string with 0 so if the division algorithm ends
@@ -125,8 +124,6 @@ unsigned char* charToBinary(unsigned char input){
 	for(int i = 0; i < 8; i++){
 		binaryString[i] = '0';		
 	}
-		/*end with null terminator*/	
-
 	int numerator = input;	
 
 		/*division algorithm*/
