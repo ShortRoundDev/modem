@@ -1,0 +1,1 @@
+gcc modulate.c -o modulate.exe -std=gnu11 -lm -lsndfile-1 && gcc demodulate.c -o demodulate.exe -std=gnu11 -lm -lsndfile-1
