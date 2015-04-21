@@ -1,25 +1,36 @@
-/*Collin Oswalt; 4/20/15
- 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+/*Collin Oswalt - 4/21/15
+ * 
+ * New version of demodulate with better algorithm.
+ * Only reads one sample at a time since it's foolish
+ * to assume that a cassette recorder operates at a perfect
+ * 74 sample rate
+ * 
+ * Reads cassette tape data perfectly (sort of).
+ * My tape deck sucks so it's not properly recording all of the data that's played
+ * 
+ * however, demodulate actually reads this data perfectly; but the data itself is wrong
+ * thus, I would appreciate it if whoever is reading this, and whoever owns a tape deck,
+ * can help test this program with their own equipment. I will test it on my other deck later,
+ * but that deck doesn't have a microphone in jack, so hopefully noise won't be too much of a
+ * factor when recording. I've gotten better results with that deck in the past.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <sndfile.h>
 #include <math.h>
-
-	/*sample size of 74 for 600 baud; half that for 1200*/
-#define SAMPLESIZE 74
 
 int main(int argc, char** argv){
 
@@ -43,44 +54,100 @@ int main(int argc, char** argv){
     printf("\nError \"%s\": could not create file!\n\n",argv[2]);
     exit(1);
   }
-  	/*data buffer for 74 sample audioclip; one bit*/
-  short* audioClip = malloc(sizeof(short) * SAMPLESIZE);
   
-	/*number of time crossed x axis measures frequency*/
-  int numberOfTimesCrossingXAxis = 0;
-	/*byte to be written to output binary file*/
-  unsigned char writeByte 	 = 0;
+    /*only get one sample at a time and check if the adjacent sample is of reversed sign
+     * then, take the number of samples it took before the sign was reversed. if it is >3 but <14,
+     * add 1 bit to the current number place. if it is >=14, do nothing (add 0)*/          
+  short thisSample 			= 0;
+    /*used for debugging; 44100/totalSamples = current timestamp along the audio file*/
+  int totalSamples			= 0;
+    /*number of times sign has changed for current wave; add 1 when # of 2400hz periods = 8
+     add 0 when # of 1200hz periods = 4*/
+  short numberOf1200hzHalfPeriods	= 0;  
+  short numberOf2400hzHalfPeriods	= 0;
+    
+    /*start positive; transmission starts positive.*/
+  short lastSample			= 1;
+    /*number of samples read before sign was switched*/
+  short numberOfSamplesBeforeSwitch 	= 0;
+    /*number placed to be added per bit. decreases every time number is added*/
+  char numberPlaceForThisByte 		= 7;
   
-	/*iterate across the whole file in blocks of SAMPLESIZE * 8 (8 for 8 bits)*/ 
-  for(int i = 0; i < transmissionInformation.frames/(SAMPLESIZE*8); i++){
-	/*iterate backwards from 7 to add each bit to each place in writeByte*/
-    for(int j = 7; j >= 0; j--){      
-	/*read 8 74-sample audio clips in the j for-loop*/
-      sf_read_short(inputWaveFile, audioClip, SAMPLESIZE);
-	/*iterate along each sample in the 74 sample audio-clip*/
-      for(int k = 0; k < SAMPLESIZE-1; k++){	
-	/*if one sample is < 0, and the other is > 0 (or vice versa), it has crossed the x axis*/
-	if((audioClip[k] < 0 && audioClip[k+1] > 0) || (audioClip[k] > 0 && audioClip[k+1] < 0)){	  
-	  numberOfTimesCrossingXAxis++;	  
-	}
+    /*byte to be written*/
+  char writeByte 			= 0;
+  
+  for(int i = 0; i < transmissionInformation.frames; i++){    
+      /*get next sample*/
+    sf_read_short(inputWaveFile, &thisSample, 1);  
+      /*used for debugging*/
+    totalSamples++;
+      /*check if sign has switched*/
+    if(thisSample == 0 || (thisSample < 0 && lastSample > 0) || (thisSample > 0 && lastSample < 0)){
+	// old output debugging
+      //printf("Triggered! this: %d\tlast: %d\n",thisSample, lastSample);      
+	
+	/*number of samples between 3 and 14, is one. (a perfect 1 is 8.5 samples and
+	 * a perfect 0 is 17 samples; 17 - 8 = 9. 9/2 = 4.5 (rounded to 5. 9 - 5 = 4, 9 + 5 = 14.
+	 * Thus, the margin of error is +- 5*/
+      if(numberOfSamplesBeforeSwitch > 3 && numberOfSamplesBeforeSwitch < 14){
+	numberOf2400hzHalfPeriods++;
+	  /*reset sample count*/
+	numberOfSamplesBeforeSwitch = 0;
       }
-            
-      	/*7 times means 2400hz*/
-      if(numberOfTimesCrossingXAxis == 7 || numberOfTimesCrossingXAxis == 6 || numberOfTimesCrossingXAxis == 8){
-	writeByte += pow(2,j);
-      }
-	/*3 times means 1200hz*/
-      
-	/*reset x-axis counter*/
-      numberOfTimesCrossingXAxis = 0;
-            
-                
+      else if(numberOfSamplesBeforeSwitch >= 14 && numberOfSamplesBeforeSwitch <= 24){
+	numberOf1200hzHalfPeriods++;
+	numberOfSamplesBeforeSwitch = 0;
+      }      
     }
-	/*write to file*/
-    putc(writeByte, outputFile);
-	/*reset output buffer*/
-    writeByte = 0;
+      //more old debugging stuff
+    //printf("this: %d last: %d at s: %f\n", thisSample, lastSample, (double)(totalSamples)/(double)(44100));
+    //printf("%d\n",numberOfSamplesBeforeSwitch);
+    //printf("%d - %d\n", numberOf2400hzHalfPeriods,numberOf1200hzHalfPeriods);
+    
+      /*# of half periods should be 8 (for 4 total periods)*/
+    if(numberOf2400hzHalfPeriods == 8){
+      //add 1 bit      
+      
+	/*reset metrics*/
+      numberOf1200hzHalfPeriods = 0;
+      numberOf2400hzHalfPeriods = 0;
+	/*add 1 to current number place*/
+      writeByte += pow(2,numberPlaceForThisByte);
+	/*iterate to next number place*/
+      numberPlaceForThisByte--;
+    }
+      /*# of half periods should be 4 (for 2 total periods*/
+    if(numberOf1200hzHalfPeriods == 4){
+      //add 0 bit (or do nothing really)
+	/*reset metrics*/
+      numberOf1200hzHalfPeriods = 0; 
+      numberOf2400hzHalfPeriods = 0;
+	/*iterate to number place. write nothing to current bit*/
+      numberPlaceForThisByte--;
+    }
+    
+      //debugging
+    //printf("byte so far: %d at number place %d\n", writeByte, numberPlaceForThisByte);
+    
+    if(numberPlaceForThisByte == -1){
+	//debugging
+      //printf("byte written!\n");
+      
+	/*write byte to file stream*/
+      putc(writeByte, outputFile);   
+	/*reset byte*/
+      writeByte = 0;
+	/*reset number place*/
+      numberPlaceForThisByte = 7;
+    }
+    
+      /*iteratre number of samples*/
+    numberOfSamplesBeforeSwitch++;
+      
+      /*get previous sample for comparing signs with next sample*/
+    lastSample = thisSample;
+    
   }
-	/*commit changes*/
+    /*write output*/
   fclose(outputFile);
 }
