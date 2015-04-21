@@ -16,11 +16,11 @@ where [cc] is your compiler (gcc, clang, etc.)
 ## Windows
 Pre-requisites:
 
-*Download C compiler (recommend MinGW)
-*Download libsndfile
-*Move sndfile.h from /libsndfile/inc -> /MinGW/inc/
-*move sndfile-1.lib from /libsndfile/lib -> /MinGW/lib
-*move sndfile-1.dll from /libsndFile/bin -> Project folder (should already be included)
+* Download C compiler (recommend MinGW)
+* Download libsndfile
+* Move sndfile.h from /libsndfile/inc -> /MinGW/inc/
+* move sndfile-1.lib from /libsndfile/lib -> /MinGW/lib
+* move sndfile-1.dll from /libsndFile/bin -> Project folder (should already be included)
 
 open cmd
 set path to MinGW\bin folder:
