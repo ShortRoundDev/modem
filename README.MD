@@ -4,6 +4,7 @@ need libsndfile (available at: http://www.mega-nerd.com/libsndfile/ )
 
 # Compilation
 
+## Linux
 simply run make in your terminal
 
 if no makefile is present, or you prefer a different compiler, run:
@@ -11,6 +12,26 @@ if no makefile is present, or you prefer a different compiler, run:
 [cc] modulate.c -o modulate -std=gnu11 -lm -lsndfile && [cc] demodulate.c -o demodulate -std=gnu11 -lm -lsndfile
 
 where [cc] is your compiler (gcc, clang, etc.)
+
+## Windows
+Pre-requisites:
+
+*Download C compiler (recommend MinGW)
+*Download libsndfile
+*Move sndfile.h from /libsndfile/inc -> /MinGW/inc/
+*move sndfile-1.lib from /libsndfile/lib -> /MinGW/lib
+*move sndfile-1.dll from /libsndFile/bin -> Project folder (should already be included)
+
+open cmd
+set path to MinGW\bin folder:
+
+path = [path to MinGW\bin\]
+
+(this should be c:\MinGW\bin\ by default)
+
+change directory to /modem/win32binaries/
+
+run make.bat
 
 #Usage
 
