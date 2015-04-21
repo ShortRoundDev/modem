@@ -66,7 +66,7 @@ int main(int argc, char** argv){
       }
             
       	/*7 times means 2400hz*/
-      if(numberOfTimesCrossingXAxis == 7){
+      if(numberOfTimesCrossingXAxis == 7 || numberOfTimesCrossingXAxis == 6 || numberOfTimesCrossingXAxis == 8){
 	writeByte += pow(2,j);
       }
 	/*3 times means 1200hz*/
