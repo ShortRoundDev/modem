@@ -33,6 +33,12 @@ change directory to /modem/win32binaries/
 
 run make.bat
 
+##Macintosh
+
+* use brew to install libsndfile
+	-> brew install libsndfile
+* run make
+
 #Usage
 
 ##Modulate
