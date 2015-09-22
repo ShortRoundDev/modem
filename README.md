@@ -1,3 +1,7 @@
+#description 
+
+Modem converts binary files into 600baud Kansas city standard audio transmissions. This can then be recorded onto a cassette tape for storage. Demodulate then turns a transmission back into a binary file. A bit of a higher fidelity tape recorder is required to avoid attenuation. An algorithm is used to compensate for loss of samples which I will add a description of later.
+
 #Demo
 https://www.youtube.com/watch?v=WrDbnvUK76s
 
