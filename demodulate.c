@@ -4,16 +4,7 @@
  * Only reads one sample at a time since it's foolish
  * to assume that a cassette recorder operates at a perfect
  * 74 sample rate
- * 
- * Reads cassette tape data perfectly (sort of).
- * My tape deck sucks so it's not properly recording all of the data that's played
- * 
- * however, demodulate actually reads this data perfectly; but the data itself is wrong
- * thus, I would appreciate it if whoever is reading this, and whoever owns a tape deck,
- * can help test this program with their own equipment. I will test it on my other deck later,
- * but that deck doesn't have a microphone in jack, so hopefully noise won't be too much of a
- * factor when recording. I've gotten better results with that deck in the past.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
